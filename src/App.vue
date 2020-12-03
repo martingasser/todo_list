@@ -32,6 +32,10 @@
 <script>
 import datepicker from './components/datepicker.vue'
 import todo from './components/todo.vue'
+import moment from 'moment'
+import API from './api.js'
+
+const apiUrl = 'http://localhost:8080/todos'
 
 export default {
   name: "App",
@@ -46,29 +50,53 @@ export default {
       todos: [],
     };
   },
+  mounted () {
+    this.api = new API(apiUrl)
+    this.getTodos()
+
+    this.api.addUpdateListener(this.getTodos)
+  },
   methods: {
+    getTodos () {
+      this.todos = []
+      this.api.getAllTodos()
+        .then(data => {
+          for (let d of data) {
+            this.todos.push({
+              id: d.id,
+              text: d.text,
+              done: d.done,
+              date: moment(d.date)
+            })
+          }
+          this.todos.sort((todoA, todoB) => -todoA.date.diff(todoB.date))
+        })
+    },
     addTodo() {
       if (this.newTodoText) {
 
-        this.todos.push({
+        const todo = {
           text: this.newTodoText,
           date: this.newTodoDate,
           id: Date.now(),
           done: false
-        });
+        }
 
+        this.todos.push(todo);
         this.todos.sort((todoA, todoB) => -todoA.date.diff(todoB.date))
-
         this.newTodoText = "";
+        this.api.addTodo(todo)
       }
     },
     
     removeTodo (item) {
-      this.todos = this.todos.filter((_item) => _item !== item);
+      this.todos = this.todos.filter((_item) => _item !== item)
+
+      this.api.removeTodo(item.id)
     },
 
     doneTodo (todo) {
-      
+      this.api.updateTodo(todo)
     },
 
     dateUpdated (date) {
