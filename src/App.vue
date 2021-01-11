@@ -35,7 +35,7 @@ import todo from './components/todo.vue'
 import moment from 'moment'
 import API from './api.js'
 
-const apiUrl = 'http://localhost:8080/todos'
+const apiUrl = 'http://localhost:8081/todos'
 
 export default {
   name: "App",
