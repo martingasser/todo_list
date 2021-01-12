@@ -9,10 +9,10 @@
         class="todo-text"
         placeholder="New todo"
       />
-      <datepicker v-on:update="dateUpdated"/>
+      <datepicker v-on:update="dateUpdated" />
       <button class="todo-add-button" v-on:click="addTodo()">Add</button>
     </div>
-    
+
     <ul v-if="todos.length">
       <li class="todo">
         <span class="todo-text list-header">Todo</span>
@@ -22,7 +22,11 @@
       </li>
 
       <li class="todo" v-for="todo in todos" :key="todo.id">
-        <todo :todo="todo" v-on:remove="removeTodo(todo)" v-on:done="doneTodo(todo)"/>
+        <todo
+          :todo="todo"
+          v-on:remove="removeTodo(todo)"
+          v-on:done="doneTodo(todo)"
+        />
       </li>
     </ul>
     <p class="none" v-else>Add a new todo in the input above</p>
@@ -30,17 +34,24 @@
 </template>
 
 <script>
-import datepicker from './components/datepicker.vue'
-import todo from './components/todo.vue'
-import API from './api.js'
+import datepicker from "./components/datepicker.vue";
+import todo from "./components/todo.vue";
+import API from "./api.js";
+import moment from "moment";
 
-const apiUrl = 'http://localhost:8081/todos'
+const host = "localhost";
+const port = 8081;
+const wsProtocol = "ws";
+const httpProtocol = "http";
+
+const wsUrl = `${wsProtocol}://${host}:${port}`;
+const apiUrl = `${httpProtocol}://${host}:${port}/todos`;
 
 export default {
   name: "App",
   components: {
     datepicker,
-    todo
+    todo,
   },
   data() {
     return {
@@ -49,47 +60,64 @@ export default {
       todos: [],
     };
   },
-  mounted () {
-    this.api = new API(apiUrl)
-    this.getAllTodos()
+  mounted() {
+    this.api = new API(apiUrl, wsUrl);
+
+    this.api.on('add', (todo) => {
+      this.todos.push(todo)
+      this.todos.sort((todoA, todoB) => -todoA.date.diff(todoB.date))
+      this.newTodoText = ""
+    })
+
+    this.api.on('update', (todo) => {
+        this.todos = this.todos.map((_item) => {
+            if (_item.id === todo.id) {
+            return todo
+            }
+            return _item
+        })
+    })
+
+    this.api.on('remove', (todo_id) => {
+        this.todos = this.todos.filter((_item) => _item.id != todo_id)
+    })
+
+    this.getAllTodos();
   },
   methods: {
-    getAllTodos () {
-      this.todos = []
-      this.api.getAllTodos()
-      .then(data => {
+    getAllTodos() {
+      this.todos = [];
+      this.api.getAllTodos().then((data) => {
         for (let d of data) {
-          this.todos.push(d)
+          this.todos.push(d);
         }
-        this.todos.sort((todoA, todoB) => -todoA.date.diff(todoB.date))
-      })
-    },   
+        this.todos.sort((todoA, todoB) => -todoA.date.diff(todoB.date));
+      });
+    },
     addTodo() {
       if (this.newTodoText) {
-        this.api.addTodo({
-          text: this.newTodoText,
-          date: this.newTodoDate,
-          done: false
-        }).then(todo => {
-          this.todos.push(todo)
-          this.todos.sort((todoA, todoB) => -todoA.date.diff(todoB.date))
-          this.newTodoText = ""
-        })
+        this.api
+          .addTodo({
+            text: this.newTodoText,
+            date: this.newTodoDate,
+            done: false,
+          })
+          .then((todo) => {
+          });
       }
     },
-    
-    removeTodo (item) {
-      this.todos = this.todos.filter((_item) => _item !== item)
-      this.api.removeTodo(item.id)
+
+    removeTodo(item) {
+      this.api.removeTodo(item.id);
     },
 
-    doneTodo (todo) {
-      this.api.updateTodo(todo)
+    doneTodo(todo) {
+      this.api.updateTodo(todo);
     },
 
-    dateUpdated (date) {
-      this.newTodoDate = date.clone()
-    }
+    dateUpdated(date) {
+      this.newTodoDate = date.clone();
+    },
   },
 };
 </script>
@@ -193,14 +221,15 @@ body {
   margin-right: 2px;
 }
 
-ul, li {
+ul,
+li {
   list-style-type: none;
   margin: 0;
   padding: 0;
 }
 
 ul {
-    margin-top: 40px;
+  margin-top: 40px;
 }
 
 button {
