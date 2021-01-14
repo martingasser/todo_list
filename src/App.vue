@@ -21,7 +21,11 @@
         <span class="todo-empty-button list-header"></span>
       </li>
 
-      <li class="todo" v-for="todo in todos" :key="todo.id">
+      <li
+        class="todo"
+        :style="[ todoStyle, { borderColor: todo.colour } ]"
+        v-for="todo in todos"
+        :key="todo.id">
         <todo
           :todo="todo"
           v-on:remove="removeTodo(todo)"
@@ -58,6 +62,10 @@ export default {
       newTodoText: "",
       newTodoDate: "",
       todos: [],
+      todoStyle: {
+        borderLeftStyle: 'solid',
+        borderLeftWidth: '5px'
+      }
     };
   },
   mounted() {
@@ -82,7 +90,11 @@ export default {
         this.todos = this.todos.filter((_item) => _item.id != todo_id)
     })
 
-    this.getAllTodos();
+    this.getAllTodos()
+
+    this.api.getColour().then(colour => {
+      this.colour = `rgb(${colour[0]}, ${colour[1]}, ${colour[2]})`
+    })
   },
   methods: {
     getAllTodos() {
@@ -100,6 +112,7 @@ export default {
           .addTodo({
             text: this.newTodoText,
             date: this.newTodoDate,
+            colour: this.colour,
             done: false,
           })
           .then((todo) => {

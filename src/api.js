@@ -38,6 +38,14 @@ class API extends WebSocket {
         this.callbacks[event] = callback
     }
 
+    getColour () {
+        return fetch(`${this.baseURL}/colour`, {
+            method: 'GET'
+        })
+        .then(response => response.json())
+        .then(json => json.colour)
+    }
+
     getAllTodos () {
         let todos = fetch(this.baseURL, {
             method: 'GET'
