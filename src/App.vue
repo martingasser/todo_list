@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper">
-    <h1>What should I do?</h1>
+    <h1 :style="{ color: colour }">What should I do?</h1>
     <div class="newtodo">
       <input
         type="text"
@@ -43,13 +43,22 @@ import todo from "./components/todo.vue";
 import API from "./api.js";
 import moment from "moment";
 
-const host = "localhost";
-const port = 8081;
-const wsProtocol = "ws";
-const httpProtocol = "http";
+// const host = "localhost";
+// const port = 8081;
+// const wsProtocol = "ws";
+// const httpProtocol = "http";
 
-const wsUrl = `${wsProtocol}://${host}:${port}`;
-const apiUrl = `${httpProtocol}://${host}:${port}/todos`;
+// const apiUrl = `${httpProtocol}://${host}:${port}/todos`;
+// const wsUrl = `${wsProtocol}://${host}:${port}/`;
+
+
+const host = 'cds-playground.uni-ak.ac.at'
+const port = 443
+const wsProtocol = 'wss'
+const httpProtocol = 'https'
+
+const wsUrl = `${wsProtocol}://${host}:${port}/todo/ws`;
+const apiUrl = `${httpProtocol}://${host}:${port}/todo/api/todos`
 
 export default {
   name: "App",
@@ -64,8 +73,9 @@ export default {
       todos: [],
       todoStyle: {
         borderLeftStyle: 'solid',
-        borderLeftWidth: '5px'
-      }
+        borderLeftWidth: '10px'
+      },
+      colour: 'rgb(0,0,0)'
     };
   },
   mounted() {
