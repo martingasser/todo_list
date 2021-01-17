@@ -9,7 +9,7 @@
 import moment from 'moment'
 
 export default {
-  name: "Todo",
+  name: "TodoItem",
   props: {
       'todo': Object,
       'color': String
@@ -27,7 +27,6 @@ export default {
       this.$emit('remove')
     },
     done () {
-      this.todo.done = true
       this.$emit('done')
     },
     todoColour() {

@@ -1,5 +1,13 @@
 import moment from 'moment'
 
+const host = "localhost";
+const port = 8081;
+const wsProtocol = "ws";
+const httpProtocol = "http";
+
+const wsUrl = `${wsProtocol}://${host}:${port}`;
+const apiUrl = `${httpProtocol}://${host}:${port}/todos`;
+
 class API extends WebSocket {
     constructor(baseURL, wsUrl) {
         super(wsUrl)
@@ -38,17 +46,65 @@ class API extends WebSocket {
         this.callbacks[event] = callback
     }
 
-    getColour () {
-        return fetch(`${this.baseURL}/colour`, {
-            method: 'GET'
+    currentUser () {
+        const user = JSON.parse(localStorage.getItem('user'))
+        return user
+    }
+
+    isAuthenticated () {
+        const user = this.currentUser()
+        if (! user) {
+            return Promise.reject('Not authenticated')
+        }
+        const requestOptions = {
+            method: 'GET',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${user.accessToken}`
+            }
+        }
+
+        return fetch(`${this.baseURL}/isLoggedIn`, requestOptions)
+        .then(response => {
+            if (response.status === 401) {
+                return Promise.reject(response.statusText)
+            }
+            return response.json()
         })
-        .then(response => response.json())
-        .then(json => json.colour)
+    }
+
+    login (username) {
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username })
+        }
+        return fetch(`${this.baseURL}/login`, requestOptions)
+        .then(response => {
+            if (response.status === 401) {
+                this.logout()
+                return Promise.reject(response.statusText)
+            }
+            return response.json()
+        })
+        .then(user => {
+            localStorage.setItem('user', JSON.stringify(user))
+            return `User ${username} logged in`
+        })
+    }
+
+    logout () {
+        localStorage.removeItem('user')
     }
 
     getAllTodos () {
-        let todos = fetch(this.baseURL, {
-            method: 'GET'
+        const user = JSON.parse(localStorage.getItem('user'))
+        return fetch(this.baseURL, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${user.accessToken}`
+            }
         })
         .then(response => response.json())
         .then(todos => {
@@ -57,16 +113,16 @@ class API extends WebSocket {
             }
             return todos
         })
-
-        return todos
     }
 
     addTodo (todo) {
+        const user = JSON.parse(localStorage.getItem('user'))
         todo = {...todo, date: todo.date.format('DD-MM-YYYY')}
         return fetch(this.baseURL, {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${user.accessToken}`
             },
             body: JSON.stringify(todo)
         })
@@ -75,24 +131,28 @@ class API extends WebSocket {
     }
 
     removeTodo(todoId) {
+        const user = JSON.parse(localStorage.getItem('user'))
         return fetch(`${this.baseURL}/${todoId}`, {
             method: 'DELETE',
             headers: {
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${user.accessToken}`
             }
         })
     }
 
     updateTodo(todo) {
+        const user = JSON.parse(localStorage.getItem('user'))
         todo = {...todo, date: todo.date.format('DD-MM-YYYY')}
         return fetch(`${this.baseURL}/${todo.id}`, {
             method: 'PUT',
             headers: {
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${user.accessToken}`
             },
             body: JSON.stringify(todo)
         })  
     }
 }
 
-export default API
+export default new API(apiUrl, wsUrl)
