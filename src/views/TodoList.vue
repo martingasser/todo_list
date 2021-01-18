@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper">
-    <h1>What should {{ currentUser }} do?</h1>
+    <h1>What should <span :style="{color: userColour}">{{ currentUser }}</span> do?</h1>
     <button id="logout" @click="logout">Logout</button>
     <div class="newtodo">
       <input
@@ -9,6 +9,7 @@
         v-model.trim="newTodoText"
         class="todo-text"
         placeholder="New todo"
+        @keyup.enter="addTodo()"
       />
       <datepicker v-on:update="dateUpdated" />
       <button class="todo-add-button" v-on:click="addTodo()">Add</button>
@@ -24,7 +25,7 @@
 
       <li
         class="todo"
-        :style="[ todoStyle, { borderColor: todo.colour } ]"
+        :style="[ todoStyle, { borderColor: todoColour(todo) } ]"
         v-for="todo in todos"
         :key="todo.id">
         <todo-item
@@ -54,6 +55,7 @@ export default {
       newTodoText: "",
       newTodoDate: "",
       todos: [],
+      users: [],
       todoStyle: {
         borderLeftStyle: 'solid',
         borderLeftWidth: '5px'
@@ -70,7 +72,7 @@ export default {
     api.on('update', (todo) => {
         this.todos = this.todos.map((_item) => {
             if (_item.id === todo.id) {
-            return todo
+              return todo
             }
             return _item
         })
@@ -80,7 +82,12 @@ export default {
         this.todos = this.todos.filter((_item) => _item.id != todo_id)
     })
 
+    api.on('addUser', user => {
+      this.users.push(user)
+    })
+
     this.getAllTodos()
+    this.getAllUsers()
   },
   methods: {
     getAllTodos() {
@@ -92,13 +99,18 @@ export default {
         this.todos.sort((todoA, todoB) => -todoA.date.diff(todoB.date));
       });
     },
+    getAllUsers () {
+      api.getAllUsers().then(users => {
+        this.users = users
+      })
+    },
     addTodo() {
       if (this.newTodoText) {
         api
           .addTodo({
             text: this.newTodoText,
             date: this.newTodoDate,
-            colour: this.colour,
+            user: this.currentUser,
             done: false,
           })
           .then(() => {
@@ -122,15 +134,25 @@ export default {
     logout() {
         api.logout()
         this.$router.push('/login')
+    },
+
+    todoColour (todo) {
+      const user = this.users.find(u => u.username == todo.user)
+      if (user) {
+        const rgb = user.colour
+        return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`
+      } else {
+        return `rgb(0, 0, 0)`
+      }
     }
   },
   computed: {
       currentUser () {
           return api.currentUser().user.username
       },
-      colour () {
-          const rgb = api.currentUser().user.colour
-          return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`
+      userColour () {
+        const rgb = api.currentUser().user.colour
+        return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`
       }
   }
 };

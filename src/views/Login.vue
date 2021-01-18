@@ -52,4 +52,8 @@ export default {
 #login {
   margin: 2em;
 }
+
+#username {
+  text-align: center;
+}
 </style>

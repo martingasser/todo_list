@@ -1,22 +1,38 @@
 <template>
-<div class="date-picker">
-    <select class="custom-select" @change="editValue('months', $event)" ref="month">
-        <option v-for='(month, index) in months' :value="index" :key='month'>
-            {{ month }}
-        </option>
+  <div class="date-picker">
+    <select
+      class="custom-select"
+      @change="editValue('months', $event)"
+      ref="month"
+    >
+      <option v-for="(month, index) in months" :value="index" :key="month">
+        {{ month }}
+      </option>
     </select>
-    <select class="custom-select" @change="editValue('date', $event)" ref="date">
-        <option v-for="i in daysInMonth" :key="i" :value="i">
-            {{ i }}
-        </option>
+    <select
+      class="custom-select"
+      @change="editValue('date', $event)"
+      ref="date"
+    >
+      <option v-for="i in daysInMonth" :key="i" :value="i">
+        {{ i }}
+      </option>
     </select>
-    <select class="custom-select" @change="editValue('year', $event)" ref="year">
-        <option v-for="i in numberOfYears" :key="i" :value="startingYear + (i - 1)">
-            {{ startingYear + (i - 1)}}
-        </option>
+    <select
+      class="custom-select"
+      @change="editValue('year', $event)"
+      ref="year"
+    >
+      <option
+        v-for="i in numberOfYears"
+        :key="i"
+        :value="startingYear + (i - 1)"
+      >
+        {{ startingYear + (i - 1) }}
+      </option>
     </select>
     <button class="reset-button" @click="today">T</button>
-</div>
+  </div>
 </template>
 
 <script>
@@ -79,37 +95,37 @@ export default {
 
 <style scoped>
 .date-picker {
-    display: flex;
-    margin-left: 10px;
-    margin-right: 10px;
+  display: flex;
+  margin-left: 10px;
+  margin-right: 10px;
 }
 
 .custom-select {
-    background-color: #eee;
-    float: left;
-    position: relative;
-    border: none;
-    color: #333;
-    display: block;
-    font-size: 16px;
-    height: 32px;
-    padding: 5px 30px 5px 10px;
-    outline: none;
-    margin-right: 5px;
+  background-color: #eee;
+  float: left;
+  position: relative;
+  border: none;
+  color: #333;
+  display: block;
+  font-size: 16px;
+  height: 32px;
+  padding: 5px 30px 5px 10px;
+  outline: none;
+  margin-right: 5px;
 }
 
 .reset-button {
-    background-color: red;
-    border: none;
-    outline: none;
+  background-color: red;
+  border: none;
+  outline: none;
 }
 
 .custom-select:after {
-    content: '\25bc';
-    color: #aaa;
-    font-size: 12px;
-    position: absolute;
-    right: 8px;
-    top: 10px;
+  content: "\25bc";
+  color: #aaa;
+  font-size: 12px;
+  position: absolute;
+  right: 8px;
+  top: 10px;
 }
 </style>
