@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 
 import TodoList from '@/views/TodoList.vue'
 import api from '@/api'
@@ -26,7 +26,8 @@ const routes = [
 ]
 
 const router = createRouter({
-    history: createWebHistory(),
+    history: createWebHashHistory(),
+    base: '/todo/',
     routes
 })
 

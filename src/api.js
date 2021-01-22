@@ -1,12 +1,5 @@
 import moment from 'moment'
-
-const host = "localhost";
-const port = 8081;
-const wsProtocol = "ws";
-const httpProtocol = "http";
-
-const wsUrl = `${wsProtocol}://${host}:${port}`;
-const apiUrl = `${httpProtocol}://${host}:${port}`;
+import { config } from '../config'
 
 class API extends WebSocket {
     constructor(baseURL, wsUrl) {
@@ -171,4 +164,4 @@ class API extends WebSocket {
     }
 }
 
-export default new API(apiUrl, wsUrl)
+export default new API(config.apiUrl, config.wsUrl)
